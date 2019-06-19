@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- (c) June 2019 by M. F. Hasler -->
+  <title>OEIS v.3.0 example page with dynamic content and CSS</title>
+  <base href="https://oeis.org/">
+  <meta name="keywords" content="OEIS,integer sequences,Sloane">
+  <link rel="search" type="application/opensearchdescription+xml" title="OEIS" href="https://oeis.org/oeis.xml">
+  <script>
+  function oejs( t ) { // t = this = the button; t.value = its value = requested action.
+	var p = t; while( p.nodeName != "P" && p.nodeName != "TD") { p = p.parentNode; } ; 
+	var tr = p; while( tr.nodeName != "TR" ) tr = tr.parentNode;
+
+	// get DATA (may need adjustment for current OEIS HTML table struct)
+	var dataTT = tr.parentNode.getElementsByTagName("TT")[0]; // this is the TT element with DATA
+	var data = dataTT.innerText.match(/[-\d]+/g).map(Number);
+	
+	// Get the signature. First, find the LINKS section.
+	// this may also need to go into second TD if 1st TD is empty
+	var links = (p.nodeName=='P' ? tr : tr.parentNode.lastElementChild); 
+	while( links.firstElementChild.innerText != "LINKS" )
+		links=links.previousElementSibling; // this is the TR element !
+	var s=links.lastElementChild.lastElementChild; // get last P in last TD 
+	// search for the paragraph with "index to recurrent seq." link
+	while( s.nodeName == 'P' && s.innerText.match(/index.+recurren.*/gi)==null)
+		s = s.previousElementSibling;
+	if( s.nodeName != 'P' ) {
+		p.innerHTML += "<b style='color:red'>Error: No relevant index link found.</b>"; return;
+	} else if( s = s.innerText.match(/signature \([-+\d, ]+\)/i))
+			s = s[0].match(/[-\d]+/g);
+	else {
+		p.innerHTML += "<b style='color:red'>Error: Didn't find signature of recurrence! (ggf not yet implemented.)</b>"; return; 
+	}
+	// get the offset
+	var offset = links;
+	while( offset.firstElementChild.innerText != "OFFSET" )
+		offset=offset.previousElementSibling; // this is the TR element !
+	offset = Number(offset.innerText.match(/[-\d]+/)[0]);
+
+	// get a minimal number of initial values
+	var init = data.slice();
+	while( init.length > s.length ) { // else stop
+		var n = init.length, aN = init[--n];
+		for(var i = 0; i < s.length; ++i) aN -= s[i]*init[--n];  
+		if( aN ) break;
+		init.pop();
+	}
+	switch( t.value ){
+	case 'PARI':
+		p.parentElement.innerHTML += "<p>(PARI) {a(n,all=0/*=1 to get vector*/,A=[" + init + "],s=[" + s +"])=" + (offset!=1 ? "n+=" + (1-offset) + ";" : "") + " while(#A&lt;n,A=concat(A,A[-#s..-1]*s~));if(all,A,A[n])}";
+		return;
+	case 'EXTEND': // This does not need offset nor init[]
+		var n = data.length, aN = 0;
+	//	p.innerHTML += " initialize aN="+aN;
+		for(var i = 0; i < s.length; ++i) aN += s[i]*data[--n];  
+	//	p.innerHTML += " a("+n+")="+aN;
+		data.push( aN );
+		dataTT.innerHTML += ", "+aN;
+		return;
+	}
+  }
+  </script>
+  <style>
+  tt { font-size: 100%; }
+  body > p {text-align:center;}
+  p { word-wrap: break-word; } 
+  p.editing { margin: 10px; text-indent: -10px; }
+  table { width:750; border-collapse:collapse; }
+  tr { vertical-align:top; }
+  th { text-align:left; font-weight: normal;}
+  td { padding:0; }
+  table.search { font-size:small; background:#FFFFCC; border: solid #76767F; border-width: 1pt 0;} 
+  thead>tr>th { width:100 }
+  tbody>tr>th { width:120; padding-left:26; font-size: x-small;}
+  .name { background:#EEEEFF;  border: solid #76767F; border-width: 1pt 0 0; vertical-align:top }
+  td > p { font-family: monospace; text-indent: -1em; margin-left: 1em; margin-top: 0; margin-bottom: 0; }
+  .textsize { font-size:12pt; }
+  .small { font-size:small; }
+  .refcount { text-align:right; font-size:x-small; }
+  </style>
+  </head>
+  <body style="background:white" onload="sf()">
+<!-- header section: login/user ; banner ; search box -->
+	<div id=user style="float:right; font-size:small; margin-bottom:8px">
+		Welcome, <a href="/history?user=M.%20F.%20Hasler">M. F. Hasler</a> 
+		(<a href="/logout?redirect=%2fA007455">logout</a>)
+		| <a href="/draft?user=M.%20F.%20Hasler">My Drafts (12)</a>
+		| <a href="/draft">Sequences awaiting review</a>
+	</div>
+    <center>
+	<p style="clear:both; font-family: sans-serif; font-size: 83%; font-style: italic">
+	This site is supported by donations to <a href="http://oeisf.org/">The OEIS Foundation</a>.
+	<p><a href="/"><img style="border:none; width:600; height:110" src="banner2021.jpg" alt="Logo"></a>
+	<form name="f" action="search" method="GET">
+		<table style="width:auto; margin-top: 7ex"><td>
+			<input maxlength="1024" size="55" name="q" value="id:a7455" title="Search Query">
+			<input type="hidden" name="sort" value="">
+			<input type="hidden" name="language" value="">
+			<input type="submit" value="Search" name="go">
+			&nbsp;
+			<font size="-2"><a href="hints.html">Hints</a></font><br>
+			<span class="small">(Greetings from <a href="welcome">The On-Line Encyclopedia of Integer Sequences</a>!)
+		</table>
+	</form>
+
+<!-- Main section. We don't need a global table to hold all the main contents, just
+	- one table for the header & footer of search results (yellow)
+	- for each sequence entry:
+		* one table for its header (A-number & name),
+		* one table for all of the other sections: DATA, OFFSET, COMMENTS ...
+	-->
+
+	<!-- header for search results -->
+	<table ><td>Search: <b> a007455 </b></table>
+	<table class="search">
+	<tr><td style="font-size:12pt;padding-bottom:2	;">Displaying 1-1 of 1 results found.
+		<td align="right"> page 1
+	<tr><td style="width:50%; padding-left:20" >Sort: relevance
+			| <a href="...">references</a>
+			| <a href="...">number</a>
+			| <a href="...">modified</a>
+			| <a href="...">created</a>
+		<td> Format: long
+			| <a href="...">short</a>
+			| <a href="...">data</a>
+	</table>
+	
+	<!-- table for individual record (sequence) -->
+	<table><thead>
+	<tr><td colspan=3 style="height:5px; border-bottom: 1pt solid #76767F;"></td></tr>
+	<tr class="name">
+		<th><a href=A007455>A007455</a></th>
+		<td>Number of subsequences of [ 1,...,n ] in which each odd number has an even neighbor.
+		<br/><font size="-1">(Formerly M2480)</font>
+		</td>
+		<td class="refcount" >4</td></tr>
+	</table>
+	<!-- its simpler to start a new table since the column borders are different -->
+	<table  cellpadding=2>
+    <tbody style="text-align:left"><tr>
+		<td colspan=2 style="padding-left: 24;"><tt>
+                     1, 1, 3, 5, 11, 17, 39, 61, 139, 217, 495, 773, 1763, 2753, 6279, 9805, 22363, 34921, 79647, 124373, 283667, 442961, 1010295, 1577629, 3598219, 5618809, 12815247, 20011685, 45642179, 71272673, 162557031, 253841389, 578955451, 904069513</tt>
+				<input type="submit" onclick="oejs(this)" value="EXTEND"/>
+                <font size="-1">(<a href="A007455/list">list</a>;
+				<a href="A007455/graph">graph</a>;
+				<a href="search?q=A007455+-id:A007455">refs</a>;
+				<a href="A007455/listen">listen</a>;
+				<a href="history?seq=A007455">history</a>;
+				<a href="edit?seq=A007455">edit</a>;
+				<a href="search?q=id:A007455&amp;fmt=text">text</a>;
+				<a href="A007455/internal">internal format</a>)
+				</font>
+			</td></tr>
+	  <th>OFFSET</th><td width="600">
+		<p > 0,3 
+	  </p></td></tr>
+	<tr>
+	<th >COMMENTS</td><td>
+		<p > G.f. = (-1-x-2 x^3)/(-1+3 x^2+2 x^4) (* <a href="wiki/User:Harvey_P._Dale">Harvey P. Dale</a>, Feb 18 2011 *) 
+	</p></td></tr>
+	<tr>
+	<th>REFERENCES</th><td >
+		 <p > N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence). 
+	</p></td></tr>
+	<tr>
+	<th >LINKS</td>
+	<td >		 
+		 <p > T. D. Noe, <a href="A007455/b007455.txt">Table of n, a(n) for n=0..400</a> 
+				 
+		 </p><p > R. K. Guy, William O. J. Moser, <a href="http://www.fq.math.ca/Scanned/34-2/guy.pdf">Numbers of subsequences without isolated odd members</a>, Fibonacci Quarterly, 34, No. 2, 152-155 (1996). 
+				 
+		 </p><p > <a href="index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (0,3,0,2). 
+				 
+	 </p></td></tr><tr>
+	 <th >FORMULA</th><td >
+		<p > a(n) = 3*a(n-2) + 2*a(n-4). 
+		</p></td></tr>
+	<tr>
+	<th>MATHEMATICA</th><td >
+			 <p > CoefficientList[Series[(-1-x-2 x^3)/(-1+3 x^2+2 x^4), {x, 0, 40}], x]&nbsp;&nbsp;(* <a href="wiki/User:Harvey_P._Dale">Harvey P. Dale</a>, Feb 18 2011 *) 
+				 
+			 </p><p > LinearRecurrence[{0, 3, 0, 2}, {1, 1, 3, 5}, 40] (* <a href="wiki/User:Harvey_P._Dale">Harvey P. Dale</a>, Feb 10 2015 *) 
+	</p></td></tr>
+	<tr>
+	<th >PROG </th>
+	<td >
+		<p > (Haskell)
+		</p><p > a007455 n = a007455_list !! n
+		</p><p > a007455_list = 1 : 1 : 3 : 5 : zipWith (+)
+		</p><p > &nbsp;&nbsp;&nbsp;(map (* 2) a007455_list) (map (* 3) $ drop 2 a007455_list)
+		</p><p > -- <a href="wiki/User:Reinhard_Zumkeller">Reinhard Zumkeller</a>, Jul 16 2012
+		</p>
+    <p>Auto-generate:
+	<input type=submit value=PARI onclick="oejs(this)" />
+	
+	</td></tr>
+	<tr>
+	<th >CROSSREFS</th>
+	<td >
+		 <p > Cf. <a href="A007481" title="Number of subsequences of [ 1,...,n ] in which each even number has an odd neighbor.">A007481</a>, <a href="A007482" title="a(n) = number of subsequences of [ 1, ..., 2n ] in which each odd number has an even neighbor.">A007482</a>, <a href="A007484" title="a(n) = 3*a(n-1) + 2*a(n-2), with a(0)=2, a(1)=7.">A007484</a>.
+			 
+		 </p><p > Sequence in context: <a href="A320353" title="Number of antichains of multisets whose multiset union is an integer partition of n.">A320353</a> <a href="A155989" title="List of numbers prime(k) as k runs through the numbers with a single prime digit.">A155989</a> <a href="A125557" title="Primes in the sequence a(n)=n^2+3/2-1/2*(-1)^n.">A125557</a> * <a href="A034729" title="a(n) = Sum_{ k, k|n } 2^(k-1).">A034729</a> <a href="A115786" title="Smallest prime number p such that p + 2#, p + 3#, ..., p + prime(n)# are all prime, where x# = A034386(x) is the primorial.">A115786</a> <a href="A252089" title="Primes p such that p + 26 is prime.">A252089</a>
+				 
+		</p><p > Adjacent sequences:&nbsp;&nbsp;<a href="A007452" title="Expand cos x / exp x and invert nonzero coefficients.">A007452</a> <a href="A007453" title="Number of connected N-free posets with n nodes.">A007453</a> <a href="A007454" title="Number of disconnected N-free posets with n nodes.">A007454</a> * <a href="A007456" title="Days required to spread gossip to n people.">A007456</a> <a href="A007457" title="Number of (j,k): j+k=n, (j,n)=(k,n)=1, j,k squarefree.">A007457</a> <a href="A007458" title="Order of group of n X n X n Rubik cube.">A007458</a>
+		 </p></td></tr>
+	<tr>
+	<th>KEYWORD</th><td >
+		 <p > <span title="a sequence of nonnegative numbers">nonn</span>,<span title="it is very easy to produce terms of sequence">easy</span>,<span title="an exceptionally nice sequence">nice</span>
+		 </p></td></tr>
+	<tr>			
+	<th>AUTHOR</th>	<td >
+		 <p > <a href="wiki/User:N._J._A._Sloane">N. J. A. Sloane</a>, <a href="wiki/User:Mira_Bernstein">Mira Bernstein</a>
+	 
+	</p></td></tr>
+	<tr><th>STATUS</th><td><p > approved </p></td></tr>
+  </tbody></table>
+  <p>
+
+	<!-- footer for search results (may include "next/prev/n-th page" links) -->
+	<table class="search"><tr><td align=right> page 1 </table>
+
+	<!-- general footer of all OEIS.org pages -->
+    <p>
+      <a href=/>Lookup</a> |
+      <a href="wiki/Welcome"><font color="red">Welcome</font></a> |
+      <a href="wiki/Main_Page"><font color="red">Wiki</font></a> |
+      <a href="wiki/Special:RequestAccount">Register</a> |      
+      <a href="play.html">Music</a> |
+      <a href="plot2.html">Plot 2</a> |
+      <a href="demo1.html">Demos</a> |
+      <a href="wiki/Index_to_OEIS">Index</a> |
+      <a href="Sbrowse.html">Browse</a> |
+      <a href="more.html">More</a> |
+      <a href="webcam">WebCam</a>
+      <br>
+      <a href="Submit.html">Contribute new seq. or comment</a> |
+      <a href="eishelp2.html">Format</a> |
+      <a href="wiki/Style_Sheet">Style Sheet</a> |
+      <a href="transforms.html">Transforms</a> |
+      <a href="ol.html">Superseeker</a> |
+      <a href="recent">Recent</a>
+      <br>
+      <a href="community.html">The OEIS Community</a> |
+      Maintained by <a href="http://oeisf.org/">The OEIS Foundation Inc.</a> 
+    </p>
+	
+    <p style="font: italic 83% sans-serif;"><a href="wiki/Legal_Documents">
+		License Agreements, Terms of Use, Privacy Policy.</a>
+    </p>
+
+    <p class="small">
+	Last modified June 16 21:20 EDT 2019.  Contains 324155 sequences. (Running on oeis4.)
+	</p>	
+</body></html>
