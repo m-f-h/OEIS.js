@@ -10,13 +10,13 @@ compute an arbitrary number of additional terms; create PROGRAMs in various lang
 
 Both of these _can_ be included in the HTML pages sent by the server, but should better be stored in separate files on the server, so they are fetched by the client only once for all pages he will visit, reducing data traffic.
 
-As a proof of concept, we provide for the moment a simple example page which:
-* has the CSS code in a < STYLE > section allowing the rest of the page to be very "clean":<br/>
+As a proof of concept, we provide for the moment a simple example page. (To test it, [save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser.)
+* The page has the CSS code in a < STYLE > section allowing the rest of the page to be very "clean":<br/>
 each displayed record has **one** TABLE tag for the header line (A-number & NAME),<br/> 
 and **one** more TABLE for the rest of the record,<br/> 
 each section being simply of the form < TR > < TH > OFFSET/COMMENT/... < TD > < P > content1 < P > content2 ...:<br/>
 no more dozens of extraneous TABLE, FONT, TT and other tags!
-* has __one single__ **<code>oejs()</code>** javascript function, _independent of the sequence_, which implements the following:
+* It has __one single__ **<code>oejs()</code>** javascript function, _independent of the sequence_, which implements the following:
 1) it adds a button **[EXTEND]** in the DATA section: on each click, one more value is added to the DATA section.<br/> 
 This can easily be modified to print an arbitrary number of terms in any desired format. In particular it can produce a _b-file of any desired length_: An additional input element (button ...) will enable the user to specifiy the format and number of terms he wants.
 2) it adds a button **[PARI]** in the PROG section: clicking it adds PARI code for a function <code>a()</code> which returns the n-th term or optionally all terms from the first to the n-th term.<br/>
