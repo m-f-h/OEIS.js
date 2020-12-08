@@ -10,7 +10,7 @@ compute an arbitrary number of additional terms; create PROGRAMs in various lang
 
 Both of these _can_ be included in the HTML pages sent by the server, but should better be stored in separate files on the server, so they are fetched by the client only once for all pages he will visit, reducing data traffic.
 
-As a proof of concept, we provide for the moment a simple example page. (To test it, [save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser.)
+As a proof of concept, we provide for the moment a simple example page. (To test it, [save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser. If anyone knows how an HTML file on github can directly be displayed as HTML, **please** let me know!)
 * The page has the CSS code in a < STYLE > section allowing the rest of the page to be very "clean":<br/>
 each displayed record has **one** TABLE tag for the header line (A-number & NAME),<br/> 
 and **one** more TABLE for the rest of the record,<br/> 
