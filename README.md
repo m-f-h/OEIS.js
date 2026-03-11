@@ -1,6 +1,9 @@
 # OEIS.js
 (c) 2019 by M.F.Hasler
 
+<sup>[NEW]</sup>2026-03-10: example page now directly available at https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html<sup>[NEW]</sup>
+
+
 For the moment being, two contributions for improving the pages at http://OEIS.org :
 
 1) a **universal** (sequence independent) javascript for client-side created **dynamic content**:<br/>
@@ -10,7 +13,7 @@ compute an arbitrary number of additional terms; create PROGRAMs in various lang
 
 Both of these _can_ be included in the HTML pages sent by the server, but should better be stored in separate files on the server, so they are fetched by the client only once for all pages he will visit, reducing data traffic.
 
-As a proof of concept, we provide for the moment a simple example page. (To test it, [save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser. If anyone knows how an HTML file on github can directly be displayed as HTML, **please** let me know!)
+As a **proof of concept**, we provide for the moment a simple example page. (To test it, <strike>[save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser. If anyone knows how an HTML file on github can directly be displayed as HTML, **please** let me know!)</strike> you can access the page at https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html.)
 * The page has the CSS code in a < STYLE > section allowing the rest of the page to be very "clean":<br/>
 each displayed record has **one** TABLE tag for the header line (A-number & NAME),<br/> 
 and **one** more TABLE for the rest of the record,<br/> 
@@ -28,3 +31,7 @@ It is easy to implement additional features like:
 * In case this is needed, the script can easily (matter of seconds) be amended to use the bignum.js extension for computations.
 * The script can also be amended to be useful for **sequences other than linear recurrences**. One extension would consist in taking JavaScript (or other) code from the PROGram section and use this to create dynamic content for in principle any arbitrary sequence.
 * The script could also make consistency checks comparing DATA, FORMULAs, the signature given in LINKS and PROGrans.
+
+## TO DO:
+- update JS (information extraction and contribution "injection") to the new format of OEIS.org/search output
+- make separate .css and .js files (originally included in the HTML page for easier download & testing)
