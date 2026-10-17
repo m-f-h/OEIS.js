@@ -6,32 +6,43 @@
 
 For the moment being, two contributions for improving the pages at http://OEIS.org :
 
-1) a **universal** (sequence independent) <u>JavaScript</u> for client-side created **dynamic content**:<br/>
+1) a **universal** (sequence independent!) <u>JavaScript</u> for client-side created **dynamic content**:<br/>
 compute an arbitrary number of additional terms; create PROGRAMs in various languages.
 
 2) <u>CSS code (style sheet)</u> to make the source code of OEIS pages by a factor 2 - 4 shorter, better structured and readable.
 
-Both of these _can_ be included in the HTML pages sent by the server, but should better be stored in separate files on the server, so they are fetched by the client only once for all pages he will visit, reducing data traffic.
+Both of these _can_ be included in the HTML pages sent by the server, 
+but (in production) should better be stored in separate files on the server, 
+so that they are fetched by the client only once for all pages they will visit, reducing data traffic.
 
-As a **proof of concept**, we provide for the moment a simple example page. (To test it, <strike>[save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S) and open it in the browser. If anyone knows how an HTML file on github can directly be displayed as HTML, **please** let me know!)</strike> you can access the page at [https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html](https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html).)
+As a **proof of concept**, we provide for the moment a simple example page. 
+(To test it, <small><strike>[save the OEIS_js_example_page.html](https://raw.githubusercontent.com/m-f-h/OEIS.js/master/OEIS_js_example_page.html) to your computer (Ctrl-S)
+and open it in the browser.</strike></small>
+you can access the page at [https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html](https://m-f-h.github.io/OEIS.js/OEIS_js_example_page.html).)
 * The page has the CSS code in a < STYLE > section allowing the rest of the page to be very "clean":<br/>
 each displayed record has **one** TABLE tag for the header line (A-number & NAME),<br/> 
 and **one** more TABLE for the rest of the record,<br/> 
 each section being simply of the form < TR > < TH > OFFSET/COMMENT/... < TD > < P > content1 < P > content2 ...:<br/>
 no more dozens of extraneous TABLE, FONT, TT and other tags!
-* The script has __one single__ **<code>oejs()</code>** JavaScript function, _independent of the sequence_, which implements the following:
+* The script has __one single__ **<code>oejs()</code>** JavaScript function, _independent of the sequence_, which implements the following:<br/>
   1) it adds a button **[EXTEND]** in the DATA section: on each click, one more value is added to the DATA section.<br/> 
-This can easily be modified to print an arbitrary number of terms in any desired format. In particular it can produce a _b-file of any desired length_: An additional input element (button ...) will enable the user to specifiy the format and number of terms he wants.
-  2) it adds a button **[PARI]** in the PROG section: clicking it adds PARI code for a function <code>a()</code> which returns the n-th term or optionally all terms from the first to the n-th term.<br/>
-This can easily (a matter of minutes if not seconds) be extended to produce various code in any desired programming language.
+This can easily be modified to print an arbitrary number of terms in any desired format. In particular it can produce a _b-file of any desired length_: An additional input element (button ...) will enable the user to specifiy the format and number of terms he wants.<br/>
+  2) it adds a button **[PARI]** in the PROG section:
+clicking it adds PARI code for a function <code>a()</code> which returns the n-th term or optionally all terms from the first to the n-th term. (The PARI code is very primitive and quite inefficient;
+it could easily be made much more efficient, but the aim was to provide a proof-of-concept)<br/>
+This can easily (a matter of minutes if not seconds) be extended to produce various code in any desired programming language: Maple, Python, Java(Script), ...
 
 It is easy to implement additional features like:
-* Automatic generation of FORMULAs: G.f., recurrence equation, ...
+* **Automatic generation of FORMULAs**: G.f., recurrence relation, ...
 * Conversely, if the recurrence signature is not given in the LINKS section, the JS can get it from a G.f. or recurrence relation given in FORMULA section. It can also find it from the DATA.
-* In case this is needed, the script can easily (matter of seconds) be amended to use the bignum.js extension for computations.
-* The script can also be amended to be useful for **sequences other than linear recurrences**. One extension would consist in taking JavaScript (or other) code from the PROGram section and use this to create dynamic content for in principle any arbitrary sequence.
-* The script could also make consistency checks comparing DATA, FORMULAs, the signature given in LINKS and PROGrans.
+* The script was written before BigInt was natively available, and would have required loading a bn/BigInteger.js extension. Today I'd use BigInt to compute terms of arbitrary size without hassle.
+* The script could be amended for **sequences other than linear recurrences**. For example, it could fetch JavaScript (or other) code from the **PROG**ram section and use this to compute the terms or other dynamic content, in principle for any arbitrary sequence.
+* The script could also make consistency checks: comparing DATA, FORMULAs, the signature given in LINKS and **PROG**rams, ...
 
-## TO DO:
+## TO DO: (*)
 - update JS (information extraction and contribution "injection") to the new format of OEIS.org/search output
 - make separate .css and .js files (originally included in the HTML page for easier download & testing)
+- implement other improvement mentioned above
+
+**(*) However,** we have decided to leave this as is in the version from 2019, as proof of concept.
+Upon demand, we will gladly make available improved versions.
